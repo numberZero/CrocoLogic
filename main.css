@@ -1,0 +1,56 @@
+﻿body
+{
+	font-family: sans-serif;
+}
+
+#Battlefield img,
+#Control img
+{
+	width: 36pt;
+	height: 36pt;
+}
+
+#Battlefield td
+{
+	border: 1pt solid #CCC;
+	width: 31.5pt;
+	height: 31.5pt;
+	padding: 2pt;
+}
+
+#Battlefield table,
+#Battlefield img
+{
+	position: absolute;
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+/*
+body
+{
+	vertical-align: top;
+}
+*/
+#Battlefield
+{
+	position: relative;
+	display: table-cell;
+	width: 432pt;
+	height: 432pt;
+}
+
+h2
+{
+	margin: 0;
+}
+
+#Control
+{
+	display: table-cell;
+	padding: 0pt 0pt 0pt 20pt;
+}
+
+.Crocodile
+{
+	z-index: 1;
+}
