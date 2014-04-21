@@ -86,6 +86,7 @@ var _Crocodiles = [];
 			for(var i = 0; i < mapWidth; ++i)
 			{
 				var field = row[i];
+				field.targeted = [null, null, null, null];
 				if(field.content instanceof Crocodile)
 					field.content.update();
 			}
@@ -177,7 +178,6 @@ var _Crocodiles = [];
 		this.img.object = this;
 		this.img.onclick = Erase;
 		bf.appendChild(this.img);
-//		this.update();
 	}
 
 	window.Crocodile.prototype = {
@@ -266,13 +266,16 @@ var _Crocodiles = [];
 						this.dir = dir;
 						this.img.src = _OmniImages[this.dir];
 						dir = _Directions[this.dir];
-						this.goTo(this.x + dir.x, this.y + dir.y);
+						this.tx = this.x + dir.x;
+						this.ty = this.y + dir.y;
+						_Crocodiles[this.ty][this.tx].targeted[this.dir] = this;
 					}
 				}
 			},
  
 		go: function()
 			{
+				this.goTo(this.tx, this.ty);
 			},
  
 		goTo: function(x, y)
@@ -281,10 +284,8 @@ var _Crocodiles = [];
 					throw "Diagonal movements are not allowed";
 				if((x == this.x) && (y == this.y))
 					return;
-				this.x = this.field.x;
-				this.y = this.field.y;
-				this.tx = x;
-				this.ty = y;
+//				this.x = this.field.x;
+//				this.y = this.field.y;
 				if(x == this.x)
 					this.vy = (y > this.y) ? 1 : -1;
 				else
