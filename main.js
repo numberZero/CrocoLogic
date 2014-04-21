@@ -69,13 +69,15 @@ var _Crocodiles = [];
 		this.img.style.top = this.y * fieldHeight + "pt";
 	}
 
-	var _Directions = [
-		{"x": 0, "y": -1},
-		{"x": +1, "y": 0},
-		{"x": -1, "y": 0},
-		{"x": 0, "y": +1},
-		{"x": 0, "y": 0},
+	const _Directions = [
+		{"x":  0, "y": -1},
+		{"x": +1, "y":  0},
+		{"x":  0, "y": +1},
+		{"x": -1, "y":  0},
+		{"x":  0, "y":  0},
 		];
+	const _Images = ["crocU.png", "crocR.png", "crocD.png", "crocL.png"];
+	const _OmniImages = ["crocOU.png", "crocOR.png", "crocOD.png", "crocOL.png"];
 		
 	var _AnimSteps = stepCount;
 	var _GlobalUpdate = function()
@@ -146,18 +148,12 @@ var _Crocodiles = [];
 			this.object.die();
 	}
 	
-	const _Images = ["crocU.png", "crocR.png", "crocL.png", "crocD.png"];
-	const _OmniImages = ["crocOU.png", "crocOR.png", "crocOL.png", "crocOD.png"];
-
 	window.Crocodile = function(field, dir)
 	{
-		if(field.content)
-			throw "Field occupied";
-		field.content = this;
-		this.field = field;
-		this.tx = field.x;
-		this.ty = field.y;
-		this.done();
+//		if(field.content)
+//			throw "Field occupied";
+		this.field = {};
+		this.target = field;
 		this.sleep = 0;
 		this.img = document.createElement("img");
 		this.img.className = "Crocodile";
@@ -173,10 +169,9 @@ var _Crocodiles = [];
 			this.omnicroc = false;
 			this.img.src = _Images[this.dir];
 		}
-		this.updatePos();
-		this.tField = field;
 		this.img.object = this;
 		this.img.onclick = Erase;
+		this.update();
 		bf.appendChild(this.img);
 	}
 
@@ -185,14 +180,6 @@ var _Crocodiles = [];
 		updatePos: _UpdatePos,
 		die: _Die,
 
-		done: function()
-			{
-				this.x = this.tx;
-				this.y = this.ty;
-				this.vx = 0;
-				this.vy = 0;
-			},
- 
 		step: function()
 			{
 				this.x += this.vx;
@@ -202,16 +189,21 @@ var _Crocodiles = [];
  
 		update: function()
 			{	
-				this.updatePos();
-				this.done();
 				this.field.content = null;
-				this.field = _Crocodiles[this.y][this.x];
-				if(this.field.content)// instanceof Meat)
+				this.field = this.target;
+				this.x = this.field.x;
+				this.y = this.field.y;
+				this.vx = 0;
+				this.vy = 0;
+				if(this.field.content)
 				{
+					if(!(this.field.content instanceof Meat))
+						throw "Can't eat anything except of Meat";
 					this.field.content.die();
 					this.sleep = 3;
 				}
 				this.field.content = this;
+				this.updatePos();
 			},
  
 		think: function()
@@ -266,16 +258,23 @@ var _Crocodiles = [];
 						this.dir = dir;
 						this.img.src = _OmniImages[this.dir];
 						dir = _Directions[this.dir];
-						this.tx = this.x + dir.x;
-						this.ty = this.y + dir.y;
-						_Crocodiles[this.ty][this.tx].targeted[this.dir] = this;
+						this.target = _Crocodiles[this.y + dir.y][this.x + dir.x];
+						this.target.targeted[this.dir] = this;
 					}
 				}
 			},
  
 		go: function()
 			{
-				this.goTo(this.tx, this.ty);
+				var front = this.target.targeted[(this.dir + 2) % 4]; // targeted from front
+				var left = this.target.targeted[(this.dir + 1) % 4]; // targeted from left
+				var right = this.target.targeted[(this.dir + 3) % 4]; // targeted from right
+				if(front && left && right)
+					this.dir = (this.dir + 2) % 4;
+				if(front || ((left == null) != (right == null)))
+					this.target = this.field;
+				else
+					this.goTo(this.target.x, this.target.y);
 			},
  
 		goTo: function(x, y)
@@ -284,8 +283,6 @@ var _Crocodiles = [];
 					throw "Diagonal movements are not allowed";
 				if((x == this.x) && (y == this.y))
 					return;
-//				this.x = this.field.x;
-//				this.y = this.field.y;
 				if(x == this.x)
 					this.vy = (y > this.y) ? 1 : -1;
 				else
@@ -324,6 +321,7 @@ var _Crocodiles = [];
 		this.field = field;
 		this.x = field.x;
 		this.y = field.y;
+		this.target = field;
 		this.img = document.createElement("img");
 		this.img.className = "Meat";
 		this.img.src = "meat.png";
