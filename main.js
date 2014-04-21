@@ -53,7 +53,7 @@ var _Crocodiles = [];
 			var cell = trow.insertCell(-1);
 			var field = {"x": i, "y": j, "cell": cell, "content": null, "wants": null};
 			row.push(field);
-			cell.textContent = i + ", " + j;
+//			cell.textContent = i + ", " + j;
 			cell.fieldX = i;
 			cell.fieldY = j;
 			cell.field = field;
