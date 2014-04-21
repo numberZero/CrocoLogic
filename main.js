@@ -4,8 +4,8 @@ const mapWidth = 12;
 const mapHeight = 12;
 const walkTime = 0.4;
 const stepLen = 0.02;
-const normVel = stepLen / walkTime;
 const stepCount = Math.floor(walkTime / stepLen);
+const normVel = 1 / stepCount;
 const dirU = 0;
 const dirR = 1;
 const dirL = 2;
@@ -62,12 +62,6 @@ var _Crocodiles = [];
 		_Crocodiles.push(row);
 	}
 	bf.appendChild(bkg);
-
-	var _UpdatePos = function()
-	{
-		this.img.style.left = this.x * fieldWidth + "pt";
-		this.img.style.top = this.y * fieldHeight + "pt";
-	}
 
 	const _Directions = [
 		{"x":  0, "y": -1},
@@ -177,14 +171,22 @@ var _Crocodiles = [];
 
 	window.Crocodile.prototype = {
 		constructor: window.Target,
-		updatePos: _UpdatePos,
 		die: _Die,
+
+		updateImage: function()
+			{
+				this.img.style.left = this.x * fieldWidth + "pt";
+				this.img.style.top = this.y * fieldHeight + "pt";
+				this.img.style.opacity = 1 / (this.sleepiness + 1);
+			},
 
 		step: function()
 			{
 				this.x += this.vx;
 				this.y += this.vy;
-				this.updatePos();
+				if(this.sleepiness)
+					this.sleepiness -= normVel;//1 / stepCount;
+				this.updateImage();
 			},
  
 		update: function()
@@ -203,7 +205,8 @@ var _Crocodiles = [];
 					this.sleep = 3;
 				}
 				this.field.content = this;
-				this.updatePos();
+				this.sleepiness = this.sleep;
+				this.updateImage();
 			},
  
 		think: function()
@@ -325,16 +328,15 @@ var _Crocodiles = [];
 		this.img = document.createElement("img");
 		this.img.className = "Meat";
 		this.img.src = "meat.png";
-		this.updatePos();
-		this.tField = field;
 		this.img.object = this;
 		this.img.onclick = Erase;
+		this.img.style.left = this.x * fieldWidth + "pt";
+		this.img.style.top = this.y * fieldHeight + "pt";
 		bf.appendChild(this.img);
 	}
 	
 	window.Meat.prototype = {
 		constructor: window.Target,
-		updatePos: _UpdatePos,
 		die: _Die,
 	}
 
