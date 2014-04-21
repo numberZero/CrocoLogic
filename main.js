@@ -111,6 +111,8 @@ var _Crocodiles = [];
 
 	var _GlobalStep = function()
 	{
+		if(!doUpdating)
+			return;
 		for(var j = 0; j < mapHeight; ++j)
 		{
 			var row = _Crocodiles[j];
@@ -123,8 +125,7 @@ var _Crocodiles = [];
 		}
 		if(!--_AnimSteps)
 		{
-			if(doUpdating)
-				_GlobalUpdate();
+			_GlobalUpdate();
 			_AnimSteps = stepCount;
 		}
 	}
@@ -156,13 +157,14 @@ var _Crocodiles = [];
 		{
 			this.omnicroc = true;
 			this.dir = 0;
-			this.img.src = _OmniImages[this.dir];
+			this.images = _OmniImages;
 		}
 		else
 		{
 			this.omnicroc = false;
-			this.img.src = _Images[this.dir];
+			this.images = _Images;
 		}
+		this.img.src = this.images[this.dir];
 		this.img.object = this;
 		this.img.onclick = Erase;
 		this.update();
@@ -259,7 +261,7 @@ var _Crocodiles = [];
 					if(dir != 4)
 					{
 						this.dir = dir;
-						this.img.src = _OmniImages[this.dir];
+						this.img.src = this.images[this.dir];
 						dir = _Directions[this.dir];
 						this.target = _Crocodiles[this.y + dir.y][this.x + dir.x];
 						this.target.targeted[this.dir] = this;
@@ -344,16 +346,26 @@ var _Crocodiles = [];
 
 function setType(a)
 {
-	if (a == dirPlay) {
-			doUpdating = !doUpdating;
-			document.getElementById("PlayButton").src = doUpdating ? "pause.png" : "play.png"
-	} else if (a == dirSave) {
-		saved = _Crocodiles.clone();
-		alert("Saved!");
-	} else if (a == dirReset) {
-		_Crocodiles = saved.clone();
-		alert("Loaded!");
-	} else {
-		type = a;
-	}
+	type = a;
+}
+
+function playPause()
+{
+	doUpdating = !doUpdating;
+	document.getElementById("PlayButton").src = doUpdating ? "pause.png" : "play.png"
+}
+
+function save()
+{
+	alert("Saved!");
+}
+
+function load()
+{
+	alert("Loaded!");
+}
+
+function reset()
+{
+	alert("Cleaned!");
 }
