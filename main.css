@@ -1,10 +1,22 @@
-﻿body
+﻿*
 {
-	font-family: sans-serif;
+	margin: 0;
+	padding: 0;
 }
 
-#Battlefield img,
-#Control img
+body
+{
+	font-family: sans-serif;
+	margin: 0;
+	padding: 0.0pt 24.0pt;
+}
+
+h1
+{
+	margin: 8.0pt 0.0pt;
+}
+
+img
 {
 	width: 36pt;
 	height: 36pt;
@@ -12,10 +24,15 @@
 
 #Battlefield td
 {
-	border: 1pt solid #CCC;
-	width: 31.5pt;
-	height: 31.5pt;
+	border: 2pt solid #000;
+	width: 31.0pt;
+	height: 31.0pt;
 	padding: 2pt;
+}
+
+#Battlefield table
+{
+	opacity: 0.15;
 }
 
 #Battlefield table,
@@ -25,12 +42,7 @@
 	border-collapse: collapse;
 	border-spacing: 0;
 }
-/*
-body
-{
-	vertical-align: top;
-}
-*/
+
 #Battlefield
 {
 	position: relative;
@@ -52,5 +64,34 @@ h2
 
 .Crocodile
 {
-	z-index: 1;
+	z-index: -1;
+}
+
+.Meat
+{
+	z-index: -2;
+}
+
+.ToolBar
+{
+	display: inline-block;
+	margin: 0.0pt 6.0pt 8.0pt;
+	padding: 0.0pt;
+}
+
+.Tool
+{
+	margin: 0.0pt;
+	padding: 2.0pt;
+	border: 3.0pt solid #FFF;
+}
+
+.ToolActive
+{
+	border-color: #6F0;
+}
+
+.Tool:hover
+{
+	border-color: #CF9;
 }

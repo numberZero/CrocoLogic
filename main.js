@@ -6,22 +6,20 @@ const walkTime = 0.4;
 const stepLen = 0.02;
 const stepCount = Math.floor(walkTime / stepLen);
 const normVel = 1 / stepCount;
-const dirU = 0;
-const dirR = 1;
-const dirL = 2;
-const dirD = 3;
-const dirAuto = 4;
-const dirMeat = 5;
-const dirEraser = 6;
-const dirPlay = 7;
-const dirSave = 8;
-const dirReset = 9;
 
-function _Dummy() {}
+const dirNorth = 0;
+const dirEast = 1;
+const dirSouth = 2;
+const dirWest = 3;
+const dirAuto = 4;
+
+const toolMeat = 5;
+
+const toolEraser = 6;
 
 var bf = document.getElementById("Battlefield");
 var bkg = document.createElement("table");
-var type = 0;
+var tool = 0;
 var doUpdating = false;
 var saved;
 var _Crocodiles = [];
@@ -30,19 +28,29 @@ var _Crocodiles = [];
 {
 	var _Click = function()
 	{
-		if(this.field.content)
+/*		if(this.field.content)
 			return;
-		if (type == dirMeat)
+		switch(tool)
 		{
-			new Meat(this.field);
-		} else if (type == dirEraser)
-		{
-		
-		} else 
-		{
-			new Crocodile(this.field, type);
+			case dirNorth:
+			case dirEast:
+			case dirSouth:
+			case dirWest:
+			case dirAuto:
+				new Crocodile(this.field, tool);
+				break;
+
+			case toolMeat:
+				new Meat(this.field);
+				break;
+				
+			case toolEraser:
+				break;
+				
+			default:
+				alert("Strange tool: " + tool);
 		}
-	}
+*/	}
 
 	for(var j = 0; j < mapHeight; ++j)
 	{
@@ -139,12 +147,23 @@ var _Crocodiles = [];
 
 	var Erase = function()
 	{
-		if (type == 6)
+		if (tool == 6)
 			this.object.die();
 	}
 	
-	window.Crocodile = function(field, dir)
+	window.Crocodile = function(a, b, c)
 	{
+		var field, dir;
+		if(typeof(a) == 'number')
+		{
+			field = _Crocodiles[b][a];
+			dir = c;
+		}
+		else
+		{
+			field = a;
+			dir = b;
+		}
 //		if(field.content)
 //			throw "Field occupied";
 		this.field = {};
@@ -193,6 +212,8 @@ var _Crocodiles = [];
  
 		update: function()
 			{	
+				if (this.sleep)
+					return;
 				this.field.content = null;
 				this.field = this.target;
 				this.x = this.field.x;
@@ -214,63 +235,62 @@ var _Crocodiles = [];
 		think: function()
 			{
 				if (this.sleep)
+					return;
+				var dir = 4;
+				var minLen = Number.POSITIVE_INFINITY;
+				
+				var tdir = this.dir;
+				var len = this.checkForMeat(tdir);
+				if(len < minLen)
 				{
-					this.img.title = this.sleep;
-					--this.sleep;
+					minLen = len;
+					dir = tdir;
 				}
-				else
+				
+				if (this.omnicroc)
 				{
-					var dir = 4;
-					var minLen = Number.POSITIVE_INFINITY;
-					
-					var tdir = this.dir;
-					var len = this.checkForMeat(tdir);
+					tdir = (this.dir + 1) % 4;
+					len = this.checkForMeat(tdir);
 					if(len < minLen)
 					{
 						minLen = len;
 						dir = tdir;
 					}
 					
-					if (this.omnicroc)
+					tdir = (this.dir + 3) % 4;
+					len = this.checkForMeat(tdir);
+					if(len < minLen)
 					{
-						tdir = (this.dir + 1) % 4;
-						len = this.checkForMeat(tdir);
-						if(len < minLen)
-						{
-							minLen = len;
-							dir = tdir;
-						}
-						
-						tdir = (this.dir + 3) % 4;
-						len = this.checkForMeat(tdir);
-						if(len < minLen)
-						{
-							minLen = len;
-							dir = tdir;
-						}
-						
-						tdir = (this.dir + 2) % 4;
-						len = this.checkForMeat(tdir);
-						if(len < minLen)
-						{
-							minLen = len;
-							dir = tdir;
-						}
+						minLen = len;
+						dir = tdir;
 					}
 					
-					if(dir != 4)
+					tdir = (this.dir + 2) % 4;
+					len = this.checkForMeat(tdir);
+					if(len < minLen)
 					{
-						this.dir = dir;
-						this.img.src = this.images[this.dir];
-						dir = _Directions[this.dir];
-						this.target = _Crocodiles[this.y + dir.y][this.x + dir.x];
-						this.target.targeted[this.dir] = this;
+						minLen = len;
+						dir = tdir;
 					}
+				}
+				
+				if(dir != 4)
+				{
+					this.dir = dir;
+					this.img.src = this.images[this.dir];
+					dir = _Directions[this.dir];
+					this.target = _Crocodiles[this.y + dir.y][this.x + dir.x];
+					this.target.targeted[this.dir] = this;
 				}
 			},
  
 		go: function()
 			{
+				if(this.sleep)
+				{
+					--this.sleep;
+					return;
+				}
 				var front = this.target.targeted[(this.dir + 2) % 4]; // targeted from front
 				var left = this.target.targeted[(this.dir + 1) % 4]; // targeted from left
 				var right = this.target.targeted[(this.dir + 3) % 4]; // targeted from right
@@ -344,9 +364,9 @@ var _Crocodiles = [];
 
 })();
 
-function setType(a)
+function setTool(a)
 {
-	type = a;
+	tool = a;
 }
 
 function playPause()
