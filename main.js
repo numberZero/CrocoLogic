@@ -13,45 +13,14 @@ const dirSouth = 2;
 const dirWest = 3;
 const dirAuto = 4;
 
-const toolMeat = 5;
-
-const toolEraser = 6;
-
 var bf = document.getElementById("Battlefield");
 var bkg = document.createElement("table");
-var tool = 0;
 var doUpdating = false;
 var saved;
 var _Crocodiles = [];
 
 (function()
 {
-	var _Click = function()
-	{
-/*		if(this.field.content)
-			return;
-		switch(tool)
-		{
-			case dirNorth:
-			case dirEast:
-			case dirSouth:
-			case dirWest:
-			case dirAuto:
-				new Crocodile(this.field, tool);
-				break;
-
-			case toolMeat:
-				new Meat(this.field);
-				break;
-				
-			case toolEraser:
-				break;
-				
-			default:
-				alert("Strange tool: " + tool);
-		}
-*/	}
-
 	for(var j = 0; j < mapHeight; ++j)
 	{
 		var row = [];
@@ -65,7 +34,6 @@ var _Crocodiles = [];
 			cell.fieldX = i;
 			cell.fieldY = j;
 			cell.field = field;
-			cell.onclick = _Click;
 		}
 		_Crocodiles.push(row);
 	}
@@ -144,28 +112,11 @@ var _Crocodiles = [];
 		this.field.content = null;
 		bf.removeChild(this.img);
 	}
-
-	var Erase = function()
-	{
-		if (tool == 6)
-			this.object.die();
-	}
 	
-	window.Crocodile = function(a, b, c)
+	window.Crocodile = function(field, dir)
 	{
-		var field, dir;
-		if(typeof(a) == 'number')
-		{
-			field = _Crocodiles[b][a];
-			dir = c;
-		}
-		else
-		{
-			field = a;
-			dir = b;
-		}
-//		if(field.content)
-//			throw "Field occupied";
+		if(field.content)
+			throw "Field occupied";
 		this.field = {};
 		this.target = field;
 		this.sleep = 0;
@@ -185,7 +136,6 @@ var _Crocodiles = [];
 		}
 		this.img.src = this.images[this.dir];
 		this.img.object = this;
-		this.img.onclick = Erase;
 		this.update();
 		bf.appendChild(this.img);
 	}
@@ -342,6 +292,8 @@ var _Crocodiles = [];
 		
 	window.Meat = function(field)
 	{
+		if(field.content)
+			throw "Field occupied";
 		field.content = this;
 		this.field = field;
 		this.x = field.x;
@@ -351,7 +303,6 @@ var _Crocodiles = [];
 		this.img.className = "Meat";
 		this.img.src = "meat.png";
 		this.img.object = this;
-		this.img.onclick = Erase;
 		this.img.style.left = this.x * fieldWidth + "pt";
 		this.img.style.top = this.y * fieldHeight + "pt";
 		bf.appendChild(this.img);
@@ -363,11 +314,6 @@ var _Crocodiles = [];
 	}
 
 })();
-
-function setTool(a)
-{
-	tool = a;
-}
 
 function playPause()
 {
