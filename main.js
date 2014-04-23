@@ -17,28 +17,9 @@ var bf = document.getElementById("Battlefield");
 var bkg = document.createElement("table");
 var doUpdating = false;
 var saved;
-var _Crocodiles = [];
 
 (function()
 {
-	for(var j = 0; j < mapHeight; ++j)
-	{
-		var row = [];
-		var trow = bkg.insertRow(-1);
-		for(var i = 0; i < mapWidth; ++i)
-		{
-			var cell = trow.insertCell(-1);
-			var field = {"x": i, "y": j, "cell": cell, "content": null, "wants": null};
-			row.push(field);
-//			cell.textContent = i + ", " + j;
-			cell.fieldX = i;
-			cell.fieldY = j;
-			cell.field = field;
-		}
-		_Crocodiles.push(row);
-	}
-	bf.appendChild(bkg);
-
 	const _Directions = [
 		{"x":  0, "y": -1},
 		{"x": +1, "y":  0},
@@ -49,77 +30,63 @@ var _Crocodiles = [];
 	const _Images = ["crocU.png", "crocR.png", "crocD.png", "crocL.png"];
 	const _OmniImages = ["crocOU.png", "crocOR.png", "crocOD.png", "crocOL.png"];
 		
-	var _AnimSteps = stepCount;
-	var _GlobalUpdate = function()
+	var Cell = function(x, y, td)
 	{
+		this.x = x;
+		this.y = y;
+		this.cell = td;
+		this.content = null;
+		td.field = this;
+		td.fieldX = x;
+		td.fieldY = y;
+//		td.textContent = i + ", " + j;
+	}
+	
+	Cell.prototype = {
+		constructor: Cell,
+		resetTargeted: function()
+		{
+			this.targeted = [null, null, null, null];
+		},
+	}
+	
+	this.forEachCell = function(callback)
+	{
+		var args = Array.prototype.slice.call(arguments, 1);
 		for(var j = 0; j < mapHeight; ++j)
 		{
 			var row = _Crocodiles[j];
 			for(var i = 0; i < mapWidth; ++i)
-			{
-				var field = row[i];
-				field.targeted = [null, null, null, null];
-				if(field.content instanceof Crocodile)
-					field.content.update();
-			}
-		}
-		for(var j = 0; j < mapHeight; ++j)
-		{
-			var row = _Crocodiles[j];
-			for(var i = 0; i < mapWidth; ++i)
-			{
-				var field = row[i];
-				if(field.content instanceof Crocodile)
-					field.content.think();
-			}
-		}
-		for(var j = 0; j < mapHeight; ++j)
-		{
-			var row = _Crocodiles[j];
-			for(var i = 0; i < mapWidth; ++i)
-			{
-				var field = row[i];
-				if(field.content instanceof Crocodile)
-					field.content.go();
-			}
+				callback.apply(row[i], args);
 		}
 	}
 
-	var _GlobalStep = function()
+	this.forEachCrocodile = function(callback)
 	{
-		if(!doUpdating)
-			return;
-		for(var j = 0; j < mapHeight; ++j)
+		var args = Array.prototype.slice.call(arguments, 1);
+		forEachCell(function()
 		{
-			var row = _Crocodiles[j];
-			for(var i = 0; i < mapWidth; ++i)
-			{
-				var field = row[i];
-				if(field.content instanceof Crocodile)
-					field.content.step();
-			}
-		}
-		if(!--_AnimSteps)
-		{
-			_GlobalUpdate();
-			_AnimSteps = stepCount;
-		}
+			if(this.content instanceof Crocodile)
+				callback.apply(this.content, args);
+		});
 	}
-	loop = setInterval(_GlobalStep, stepLen * 1000);
 
 	var _Die = function()
 	{
 		this.field.content = null;
 		bf.removeChild(this.img);
+		if(this.ondie)
+			this.ondie();
 	}
 	
-	window.Crocodile = function(field, dir)
+	this.Crocodile = function(field, dir)
 	{
 		if(field.content)
 			throw "Field occupied";
 		this.field = {};
 		this.target = field;
 		this.sleep = 0;
+		this.ate = 0;
 		this.img = document.createElement("img");
 		this.img.className = "Crocodile";
 		this.dir = dir;
@@ -140,8 +107,8 @@ var _Crocodiles = [];
 		bf.appendChild(this.img);
 	}
 
-	window.Crocodile.prototype = {
-		constructor: window.Target,
+	this.Crocodile.prototype = {
+		constructor: this.Crocodile,
 		die: _Die,
 
 		updateImage: function()
@@ -176,6 +143,7 @@ var _Crocodiles = [];
 						throw "Can't eat anything except of Meat";
 					this.field.content.die();
 					this.sleep = 3;
+					++this.ate;
 				}
 				this.field.content = this;
 				this.sleepiness = this.sleep;
@@ -290,7 +258,7 @@ var _Crocodiles = [];
 			},
 	}
 		
-	window.Meat = function(field)
+	this.Meat = function(field)
 	{
 		if(field.content)
 			throw "Field occupied";
@@ -308,11 +276,48 @@ var _Crocodiles = [];
 		bf.appendChild(this.img);
 	}
 	
-	window.Meat.prototype = {
-		constructor: window.Target,
+	this.Meat.prototype = {
+		constructor: this.Meat,
 		die: _Die,
 	}
 
+	var _AnimSteps = stepCount;
+	var _GlobalUpdate = function()
+	{
+		forEachCell(Cell.prototype.resetTargeted);
+		forEachCrocodile(Crocodile.prototype.update);
+		forEachCrocodile(Crocodile.prototype.think);
+		for(var i = 0; i < onupdate.length; ++i)
+			onupdate[i]();
+		forEachCrocodile(Crocodile.prototype.go);
+	}
+
+	var _GlobalStep = function()
+	{
+		if(!doUpdating)
+			return;
+		forEachCrocodile(Crocodile.prototype.step);
+		if(!--_AnimSteps)
+		{
+			_GlobalUpdate();
+			_AnimSteps = stepCount;
+		}
+	}
+
+	var _Crocodiles = [];
+	for(var j = 0; j < mapHeight; ++j)
+	{
+		var row = [];
+		var trow = bkg.insertRow(-1);
+		for(var i = 0; i < mapWidth; ++i)
+			row.push(new Cell(i, j, trow.insertCell(-1)));
+		_Crocodiles.push(row);
+	}
+	bf.appendChild(bkg);
+	
+	this.onupdate = [];
+
+	setInterval(_GlobalStep, stepLen * 1000);
 })();
 
 function playPause()

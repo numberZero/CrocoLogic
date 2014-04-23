@@ -16,6 +16,11 @@ h1
 	margin: 8.0pt 0.0pt;
 }
 
+h3
+{
+	margin: 12.0pt 0.0pt 4.0pt;
+}
+
 img
 {
 	width: 36pt;
@@ -94,4 +99,25 @@ h2
 .Tool:hover
 {
 	border-color: #CF9;
+}
+
+.ObjectSelected
+{
+	background: #CCF;
+}
+
+#Infobox > *
+{
+	display: none;
+}
+
+#Infobox > .InfoboxActive
+{
+	display: block;
+}
+
+#Infobox img
+{
+	width: 1.0em;
+	height: 1.0em;
 }

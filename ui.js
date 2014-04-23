@@ -1,6 +1,9 @@
 function bind(fn, obj, args)
 {
-	args = args || [];
+	if(arguments.length < 2)
+		obj = this;
+	if(!(args instanceof Array))
+		args = Array.prototype.slice.call(arguments, 2);
 	return function() { fn.apply(obj, args); }
 }
 
@@ -13,9 +16,72 @@ function bind_passthis(fn, args)
 (function()
 {
 	var Click;
+	var Selected = null;
+	var Infobox = document.getElementById("Infobox");
+	var DummyCell = { field: { x: null, y: null, content: null }};
+	DummyCell.field.cell = DummyCell;
+	
+	function getInfoboxElement(infobox, key)
+	{
+		return document.getElementById("Infobox" + infobox + key);
+	}
+	
+	function updateData(infobox, data)
+	{
+		getInfoboxElement(infobox, "").classList.add("InfoboxActive");
+		for(var id in data)
+			getInfoboxElement(infobox, id).textContent = data[id];
+	}
+	
+	Crocodile.prototype.updateInfobox = function()
+	{
+		var img = getInfoboxElement("Croc", "Img");
+		img.src = this.img.src;
+		img.style.opacity = this.img.style.opacity;
+		updateData("Croc", {
+			"X": this.field.x,
+			"Y": this.field.y,
+			"Sleepy": this.sleep,
+			"Ate": this.ate,
+		});
+	}
+	
+	Meat.prototype.updateInfobox = function()
+	{
+		updateData("Meat", {
+			"X": this.field.x,
+			"Y": this.field.y,
+		});
+	}
+	
+	function MakeInfobox()
+	{
+		var e = document.getElementsByClassName("InfoboxActive");
+		while(e.length)
+			e[0].classList.remove("InfoboxActive");
+		UpdateInfobox();
+	}
+	
+	function UpdateInfobox()
+	{
+		if(Selected)
+			Selected.updateInfobox();
+	}
 	
 	function Select()
 	{
+		if(Selected)
+		{
+			Selected.ondie = null;
+			Selected.img.classList.remove("ObjectSelected");
+		}
+		Selected = this.field.content;
+		if(Selected)
+		{
+			Selected.img.classList.add("ObjectSelected");
+			Selected.ondie = function() { Select.call(DummyCell); };
+		}
+		MakeInfobox();
 	}
 	
 	function Erase()
@@ -134,4 +200,6 @@ function bind_passthis(fn, args)
 	
 	document.getElementById("Battlefield").onclick = BFClick;
 	document.getElementById("Tool_0_0").onclick();
+	
+	onupdate.push(UpdateInfobox);
 })()
