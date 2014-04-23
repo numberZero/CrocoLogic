@@ -1,4 +1,4 @@
 CrocoLogic
 ==========
 
-A silly thing made be some silly coders.
+A simple (and a bit silly) but funny logic game =)
