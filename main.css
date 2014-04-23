@@ -121,3 +121,23 @@ h2
 	width: 1.0em;
 	height: 1.0em;
 }
+
+.UsingTool_MakeCroc #Battlefield td:hover
+{
+	background: #9F0;
+}
+
+.UsingTool_MakeMeat #Battlefield td:hover
+{
+	background: #F90;
+}
+
+.UsingTool_Select #Battlefield td:hover
+{
+	background: #66F;
+}
+
+.UsingTool_Erase #Battlefield td:hover
+{
+	background: #F00;
+}

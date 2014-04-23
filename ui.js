@@ -4,18 +4,24 @@ function bind(fn, obj, args)
 		obj = this;
 	if(!(args instanceof Array))
 		args = Array.prototype.slice.call(arguments, 2);
-	return function() { fn.apply(obj, args); }
+	var result = function() { fn.apply(obj, args); }
+	result.object = obj;
+	result.method = fn;
+	return result;
 }
 
 function bind_passthis(fn, args)
 {
 	args = args || [];
-	return function(self) { fn.apply(self, args); }
+	var result = function(self) { fn.apply(self, args); }
+	result.object = null;
+	result.method = fn;
+	return result;
 }
 
 (function()
 {
-	var Click;
+	var Click = {method:{}};
 	var Selected = null;
 	var Infobox = document.getElementById("Infobox");
 	var DummyCell = { field: { x: null, y: null, content: null }};
@@ -107,7 +113,9 @@ function bind_passthis(fn, args)
 	
 	function SelectTool()
 	{
+		document.body.classList.remove("UsingTool_" + Click.method.name);
 		Click = this.fn;
+		document.body.classList.add("UsingTool_" + Click.method.name);
 		var old = document.getElementsByClassName("ToolActive");
 		while(old.length)
 			old[0].classList.remove("ToolActive");
