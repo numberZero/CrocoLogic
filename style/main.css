@@ -1,4 +1,8 @@
-﻿*
+﻿@charset "utf-8";
+@import "battlefield.css";
+@import "panel.css";
+
+*
 {
 	margin: 0;
 	padding: 0;
@@ -7,7 +11,6 @@
 body
 {
 	font-family: sans-serif;
-	margin: 0;
 	padding: 0.0pt 24.0pt;
 }
 
@@ -21,123 +24,7 @@ h3
 	margin: 12.0pt 0.0pt 4.0pt;
 }
 
-img
-{
-	width: 36pt;
-	height: 36pt;
-}
-
-#Battlefield td
-{
-	border: 2pt solid #000;
-	width: 31.0pt;
-	height: 31.0pt;
-	padding: 2pt;
-}
-
-#Battlefield table
-{
-	opacity: 0.15;
-}
-
-#Battlefield table,
-#Battlefield img
-{
-	position: absolute;
-	border-collapse: collapse;
-	border-spacing: 0;
-}
-
-#Battlefield
-{
-	position: relative;
-	display: table-cell;
-	width: 432pt;
-	height: 432pt;
-}
-
 h2
 {
 	margin: 0;
-}
-
-#Control
-{
-	display: table-cell;
-	padding: 0pt 0pt 0pt 20pt;
-}
-
-.Crocodile
-{
-	z-index: -1;
-}
-
-.Meat
-{
-	z-index: -2;
-}
-
-.ToolBar
-{
-	display: inline-block;
-	margin: 0.0pt 6.0pt 8.0pt;
-	padding: 0.0pt;
-}
-
-.Tool
-{
-	margin: 0.0pt;
-	padding: 2.0pt;
-	border: 3.0pt solid #FFF;
-}
-
-.ToolActive
-{
-	border-color: #6F0;
-}
-
-.Tool:hover
-{
-	border-color: #CF9;
-}
-
-.ObjectSelected
-{
-	background: #CCF;
-}
-
-#Infobox > *
-{
-	display: none;
-}
-
-#Infobox > .InfoboxActive
-{
-	display: block;
-}
-
-#Infobox img
-{
-	width: 1.0em;
-	height: 1.0em;
-}
-
-.UsingTool_MakeCroc #Battlefield td:hover
-{
-	background: #9F0;
-}
-
-.UsingTool_MakeMeat #Battlefield td:hover
-{
-	background: #F90;
-}
-
-.UsingTool_Select #Battlefield td:hover
-{
-	background: #66F;
-}
-
-.UsingTool_Erase #Battlefield td:hover
-{
-	background: #F00;
 }
