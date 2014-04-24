@@ -1,0 +1,50 @@
+@charset "utf-8";
+ 
+#Control
+{
+	display: inline-block;
+	padding: 0pt 0pt 0pt 20pt;
+	vertical-align: top;
+}
+
+.ToolBar
+{
+	display: inline-block;
+	margin: 0.0pt 6.0pt 8.0pt;
+	padding: 0.0pt;
+}
+
+.Tool
+{
+	margin: 0.0pt;
+	padding: 2.0pt;
+	border: 3.0pt solid #FFF;
+	width: 24pt;
+	height: 24pt;
+}
+
+.ToolActive
+{
+	border-color: #6F0;
+}
+
+.Tool:hover
+{
+	border-color: #CF9;
+}
+
+#Infobox > *
+{
+	display: none;
+}
+
+#Infobox > .InfoboxActive
+{
+	display: block;
+}
+
+#Infobox img
+{
+	width: 1.0em;
+	height: 1.0em;
+}

@@ -1,0 +1,84 @@
+@charset "utf-8";
+
+#BattlefieldContainer
+{
+	font-size: 36pt;
+	line-height: 36pt;
+}
+
+#BattlefieldContainer img
+{
+	width: 1.0em;
+	height: 1.0em;
+}
+
+#Battlefield
+{
+	position: absolute;
+}
+
+#Battlefield img
+{
+	position: absolute;
+}
+
+#BattlefieldGrid
+{
+	border-collapse: collapse;
+	border-spacing: 0;
+	opacity: 0.15;
+	outline: 2pt solid #000;
+	table-layout: fixed;
+}
+
+#BattlefieldGrid td
+{
+	width: 1.0em;
+	height: 1.0em;
+	min-width: 1.0em;
+	max-width: 1.0em;
+	min-height: 1.0em;
+	max-height: 1.0em;
+	outline: 1pt solid #000;
+}
+
+#BattlefieldContainer
+{
+	position: relative;
+	display: inline-block;
+}
+
+.Crocodile
+{
+	z-index: -1;
+}
+
+.Meat
+{
+	z-index: -2;
+}
+
+.ObjectSelected
+{
+	background: #CCF;
+}
+
+.UsingTool_MakeCroc #BattlefieldGrid td:hover
+{
+	background: #9F0;
+}
+
+.UsingTool_MakeMeat #BattlefieldGrid td:hover
+{
+	background: #F90;
+}
+
+.UsingTool_Select #BattlefieldGrid td:hover
+{
+	background: #66F;
+}
+
+.UsingTool_Erase #BattlefieldGrid td:hover
+{
+	background: #F00;
+}

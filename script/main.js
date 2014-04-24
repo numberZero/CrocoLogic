@@ -1,5 +1,5 @@
-﻿const fieldWidth = 36;
-const fieldHeight = 36;
+﻿/*const fieldWidth = 36;
+const fieldHeight = 36;*/
 const mapWidth = 12;
 const mapHeight = 12;
 const walkTime = 0.4;
@@ -27,8 +27,8 @@ var saved;
 		{"x": -1, "y":  0},
 		{"x":  0, "y":  0},
 		];
-	const _Images = ["crocU.png", "crocR.png", "crocD.png", "crocL.png"];
-	const _OmniImages = ["crocOU.png", "crocOR.png", "crocOD.png", "crocOL.png"];
+	const _Images = ["image/crocU.png", "image/crocR.png", "image/crocD.png", "image/crocL.png"];
+	const _OmniImages = ["image/crocOU.png", "image/crocOR.png", "image/crocOD.png", "image/crocOL.png"];
 		
 	var Cell = function(x, y, td)
 	{
@@ -36,6 +36,7 @@ var saved;
 		this.y = y;
 		this.cell = td;
 		this.content = null;
+//		td.textContent = " ";
 		td.field = this;
 		td.fieldX = x;
 		td.fieldY = y;
@@ -79,10 +80,13 @@ var saved;
 			this.ondie();
 	}
 	
+	var crocCount = 0;
+	
 	this.Crocodile = function(field, dir)
 	{
 		if(field.content)
 			throw "Field occupied";
+		this.id = crocCount++;
 		this.field = {};
 		this.target = field;
 		this.sleep = 0;
@@ -113,8 +117,8 @@ var saved;
 
 		updateImage: function()
 			{
-				this.img.style.left = this.x * fieldWidth + "pt";
-				this.img.style.top = this.y * fieldHeight + "pt";
+				this.img.style.left = this.x + "em";
+				this.img.style.top = this.y + "em";
 				this.img.style.opacity = 1 / (this.sleepiness + 1);
 			},
 
@@ -269,10 +273,10 @@ var saved;
 		this.target = field;
 		this.img = document.createElement("img");
 		this.img.className = "Meat";
-		this.img.src = "meat.png";
+		this.img.src = "image/meat.png";
 		this.img.object = this;
-		this.img.style.left = this.x * fieldWidth + "pt";
-		this.img.style.top = this.y * fieldHeight + "pt";
+		this.img.style.left = this.x + "em";
+		this.img.style.top = this.y + "em";
 		bf.appendChild(this.img);
 	}
 	
@@ -313,7 +317,8 @@ var saved;
 			row.push(new Cell(i, j, trow.insertCell(-1)));
 		_Crocodiles.push(row);
 	}
-	bf.appendChild(bkg);
+	bkg.id = "BattlefieldGrid";
+	document.getElementById("BattlefieldContainer").appendChild(bkg);
 	
 	this.onupdate = [];
 
@@ -323,7 +328,7 @@ var saved;
 function playPause()
 {
 	doUpdating = !doUpdating;
-	document.getElementById("PlayButton").src = doUpdating ? "pause.png" : "play.png"
+	document.getElementById("PlayButton").src = doUpdating ? "image/pause.png" : "image/play.png"
 }
 
 function save()

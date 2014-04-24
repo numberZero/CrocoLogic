@@ -47,6 +47,7 @@ function bind_passthis(fn, args)
 		updateData("Croc", {
 			"X": this.field.x,
 			"Y": this.field.y,
+			"Id": this.id,
 			"Sleepy": this.sleep,
 			"Ate": this.ate,
 		});
@@ -132,49 +133,49 @@ function bind_passthis(fn, args)
 		[
 			{
 				name: "Select",
-				image: "arrow.png",
+				image: "image/arrow.png",
 				tool: Select,
 			},
 			{
 				name: "Erase",
-				image: "delete.png",
+				image: "image/delete.png",
 				tool: Erase,
 			},
 		],
 		[
 			{
 				name: "North",
-				image: "crocU.png",
+				image: "image/crocU.png",
 				tool: MakeCroc,
 				params: [0],
 			},
 			{
 				name: "East",
-				image: "crocR.png",
+				image: "image/crocR.png",
 				tool: MakeCroc,
 				params: [1],
 			},
 			{
 				name: "South",
-				image: "crocD.png",
+				image: "image/crocD.png",
 				tool: MakeCroc,
 				params: [2],
 			},
 			{
 				name: "West",
-				image: "crocL.png",
+				image: "image/crocL.png",
 				tool: MakeCroc,
 				params: [3],
 			},
 			{
 				name: "Auto",
-				image: "crocO.png",
+				image: "image/crocO.png",
 				tool: MakeCroc,
 				params: [4],
 			},
 			{
 				name: "Meat",
-				image: "meat.png",
+				image: "image/meat.png",
 				tool: MakeMeat,
 			},
 		]
@@ -206,7 +207,7 @@ function bind_passthis(fn, args)
 		toolbox.appendChild(panel);
 	}
 	
-	document.getElementById("Battlefield").onclick = BFClick;
+	document.getElementById("BattlefieldGrid").onclick = BFClick;
 	document.getElementById("Tool_0_0").onclick();
 	
 	onupdate.push(UpdateInfobox);
