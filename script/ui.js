@@ -19,6 +19,31 @@ function bind_passthis(fn, args)
 	return result;
 }
 
+function MakeToolbars(toolbox, data, callback) // pass false as callback to suppress modifying data
+{
+	for(var k = 0; k < data.length; ++k)
+	{
+		var toolgroup = data[k];
+		var panel = document.createElement("span");
+		panel.className = "ToolBar";
+		for(var i = 0; i < toolgroup.length; ++i)
+		{
+			var spec = toolgroup[i];
+			var tool = document.createElement("img");
+			tool.src = spec.image;
+			tool.title = spec.name;
+			tool.className = "Tool";
+			tool.onclick = spec.tool;
+			if(callback !== false)
+				spec.button = tool;
+			if(callback)
+				callback.call(tool, spec, k, i);
+			panel.appendChild(tool);
+		}
+		toolbox.appendChild(panel);
+	}
+}
+
 (function()
 {
 	var Click = {method:{}};
@@ -131,84 +156,94 @@ function bind_passthis(fn, args)
 	
 	var tools = [
 		[
-			{
-				name: "Select",
-				image: "image/arrow.png",
-				tool: Select,
-			},
-			{
-				name: "Erase",
-				image: "image/delete.png",
-				tool: Erase,
-			},
+			{	name: "Select",	image: "image/arrow.png",	tool: Select,	},
+			{	name: "Erase",	image: "image/delete.png",	tool: Erase,	},
 		],
 		[
-			{
-				name: "North",
-				image: "image/crocU.png",
-				tool: MakeCroc,
-				params: [0],
-			},
-			{
-				name: "East",
-				image: "image/crocR.png",
-				tool: MakeCroc,
-				params: [1],
-			},
-			{
-				name: "South",
-				image: "image/crocD.png",
-				tool: MakeCroc,
-				params: [2],
-			},
-			{
-				name: "West",
-				image: "image/crocL.png",
-				tool: MakeCroc,
-				params: [3],
-			},
-			{
-				name: "Auto",
-				image: "image/crocO.png",
-				tool: MakeCroc,
-				params: [4],
-			},
-			{
-				name: "Meat",
-				image: "image/meat.png",
-				tool: MakeMeat,
-			},
+			{	name: "North",	image: "image/crocU.png",	tool: MakeCroc,	params: [0],	},
+			{	name: "East",	image: "image/crocR.png",	tool: MakeCroc,	params: [1],	},
+			{	name: "South",	image: "image/crocD.png",	tool: MakeCroc,	params: [2],	},
+			{	name: "West",	image: "image/crocL.png",	tool: MakeCroc,	params: [3],	},
+			{	name: "Auto",	image: "image/crocO.png",	tool: MakeCroc,	params: [4],	},
+			{	name: "Meat",	image: "image/meat.png",	tool: MakeMeat,	},
 		]
 	];
 
 	var toolbox = document.getElementById("Toolbox");
-	for(var k = 0; k < tools.length; ++k)
-	{
-		var toolgroup = tools[k];
-		var panel = document.createElement("span");
-		panel.className = "ToolBar";
-		for(var i = 0; i < toolgroup.length; ++i)
+	MakeToolbars(toolbox, tools, function(spec, bar, button)
 		{
-			var spec = toolgroup[i];
-			if(!spec)
-			{
-				toolbox.appendChild(document.createTextNode(" "));
-				continue;
-			}
-			var tool = document.createElement("img");
-			tool.src = spec.image;
-			tool.title = spec.name;
-			tool.className = "Tool";
-			tool.id = "Tool_" + k + "_" + i;
-			tool.onclick = SelectTool;
-			tool.fn = bind_passthis(spec.tool, spec.params);
-			panel.appendChild(tool);
-		}
-		toolbox.appendChild(panel);
-	}
+			this.onclick = SelectTool;
+			this.fn = bind_passthis(spec.tool, spec.params);
+			spec.button = this;
+		});
 	
 	document.getElementById("BattlefieldGrid").onclick = BFClick;
-	document.getElementById("Tool_0_0").onclick();
+	tools[0][0].button.onclick();
 	
 	onupdate.push(UpdateInfobox);
-})()
+})();
+
+(function()
+{
+	var tools = [
+		[
+			{	name: "Play",	image: "image/play.png",	tool: Play,	},
+			{	name: "Pause",	image: "image/pause.png",	tool: Pause,	},
+		],
+		[
+			{	name: "Reset",	image: "image/reset.png",	tool: Reset,	},
+			{	name: "Load",	image: "image/load.png",	tool: Load,	},
+			{	name: "Save",	image: "image/save.png",	tool: Save,	},
+		]
+	];
+
+	var toolbox = document.getElementById("Controlbox");
+	MakeToolbars(toolbox, tools);
+	
+	function Play()
+	{
+		play();
+		tools[0][0].button.style.display = "none";
+		tools[0][1].button.style.display = "";
+	}
+	
+	function Pause()
+	{
+		pause();
+		tools[0][0].button.style.display = "";
+		tools[0][1].button.style.display = "none";
+	}
+	
+	function Reset()
+	{
+		if(!confirm("Clear whole field?"))
+			return;
+		var k = prompt("Enter new map size (one or two numbers, separated by anything), or leave the filed blank to keep current map size");
+		k = /^\s*([0-9]+)((\s*[^\s\d]+\s*|\s+)([0-9]+))?\s*$/.exec(k);
+		if(k)
+		{
+			var w = k[1];
+			var h = k[4] || null;
+		}
+		initialize(w, h);
+	}
+	
+	function Load()
+	{
+		var data = prompt("Enter saved data, or nothing to cancel");
+		if(!data)
+			return; // silently
+		data = JSON.parse(data);
+		if(!data)
+			return void(alert("Invalid JSON"));
+		Pause();
+		restore(data);
+	}
+	
+	function Save()
+	{
+		alert(JSON.stringify(serialize()));
+	}
+	
+	Pause();
+})();
