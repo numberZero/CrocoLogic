@@ -9,26 +9,22 @@ const dirNorth = 0;
 const dirEast = 1;
 const dirSouth = 2;
 const dirWest = 3;
-const dirAuto = 4;
+const dirCount = 4;
 
-var bf = document.getElementById("Battlefield");
-var doUpdating = false;
-var saved;
+const dirAuto = -1; // anything except of [0; dirCount)
+const dirNone = -1; // anything except of [0; dirCount)
 
 (function()
 {
 	const _Directions = [
-		{"x":  0, "y": -1},
-		{"x": +1, "y":  0},
-		{"x":  0, "y": +1},
-		{"x": -1, "y":  0},
-		{"x":  0, "y":  0},
+		{x:  0, y: -1},
+		{x: +1, y:  0},
+		{x:  0, y: +1},
+		{x: -1, y:  0},
 		];
 	const _Images = ["image/crocU.png", "image/crocR.png", "image/crocD.png", "image/crocL.png"];
 	const _OmniImages = ["image/crocOU.png", "image/crocOR.png", "image/crocOD.png", "image/crocOL.png"];
 
-	var _Crocodiles;
-		
 	var Cell = function(x, y, td)
 	{
 		this.x = x;
@@ -36,7 +32,6 @@ var saved;
 		this.cell = td;
 		this.content = null;
 		this.targetedBy = null;
-//		td.textContent = " ";
 		td.field = this;
 		td.fieldX = x;
 		td.fieldY = y;
@@ -80,8 +75,6 @@ var saved;
 		if(this.ondie)
 			this.ondie();
 	}
-	
-	var crocCount = 0;
 	
 	this.Crocodile = function(field, dir)
 	{
@@ -171,7 +164,7 @@ var saved;
 			{
 				if (this.sleep)
 					return;
-				var dir = 4;
+				var dir = dirNone;
 				var minLen = Number.POSITIVE_INFINITY;
 				
 				var tdir = this.dir;
@@ -184,7 +177,7 @@ var saved;
 				
 				if (this.omnicroc)
 				{
-					tdir = (this.dir + 1) % 4;
+					tdir = (this.dir + 1) % dirCount;
 					len = this.checkForMeat(tdir);
 					if(len < minLen)
 					{
@@ -192,7 +185,7 @@ var saved;
 						dir = tdir;
 					}
 					
-					tdir = (this.dir + 3) % 4;
+					tdir = (this.dir + 3) % dirCount;
 					len = this.checkForMeat(tdir);
 					if(len < minLen)
 					{
@@ -200,7 +193,7 @@ var saved;
 						dir = tdir;
 					}
 					
-					tdir = (this.dir + 2) % 4;
+					tdir = (this.dir + 2) % dirCount;
 					len = this.checkForMeat(tdir);
 					if(len < minLen)
 					{
@@ -209,7 +202,7 @@ var saved;
 					}
 				}
 				
-				if(dir != 4)
+				if(dir != dirNone)
 				{
 					this.dir = dir;
 					dir = _Directions[this.dir];
@@ -226,32 +219,26 @@ var saved;
 					--this.sleep;
 					return;
 				}
-				var front = this.target.targeted[(this.dir + 2) % 4]; // targeted from front
-				var left = this.target.targeted[(this.dir + 1) % 4]; // targeted from left
-				var right = this.target.targeted[(this.dir + 3) % 4]; // targeted from right
+				if(this.target == this.field)
+					return;
+				var front = this.target.targeted[(this.dir + 2) % dirCount]; // targeted from front
+				var left = this.target.targeted[(this.dir + 1) % dirCount]; // targeted from left
+				var right = this.target.targeted[(this.dir + 3) % dirCount]; // targeted from right
 				if(front && left && right)
-					this.dir = (this.dir + 2) % 4;
+					this.dir = (this.dir + 2) % dirCount;
 				if(front || ((left == null) != (right == null)))
 					this.target = this.field;
 				else
-					this.goTo(this.target.x, this.target.y);
-				this.target.targetedBy = this;
+					this.walk();
 			},
  
-		goTo: function(x, y)
+		walk: function()
 			{
-				if((x != this.x) && (y != this.y))
-					throw "Diagonal movements are not allowed";
-				if((x == this.x) && (y == this.y))
-					return;
-				if(x == this.x)
-					this.vy = (y > this.y) ? 1 : -1;
-				else
-					this.vx = (x > this.x) ? 1 : -1;
-				this.vx *= normVel;
-				this.vy *= normVel;
+				this.vx = _Directions[this.dir].x * normVel;
+				this.vy = _Directions[this.dir].y * normVel;
+				this.target.targetedBy = this;
 			},
-		
+	
 		checkForMeat: function(dir)
 			{
 				if(!dir.hasOwnProperty("x"))
@@ -322,9 +309,6 @@ var saved;
 		}
 	}
 	
-	bkg = document.createElement("table");
-	bkg.id = "BattlefieldGrid";
-
 	this.play = function()
 	{
 		doUpdating = true;
@@ -410,6 +394,12 @@ var saved;
 		}
 	}
 
+	var _Crocodiles;
+	var crocCount = 0;
+	var doUpdating;
+	var bf = document.getElementById("Battlefield");
+	var bkg = document.createElement("table");
+	bkg.id = "BattlefieldGrid";
 	this.onupdate = [];
 	this.pause();
 	this.initialize(mapWidth, mapHeight);

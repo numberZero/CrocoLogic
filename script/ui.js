@@ -160,11 +160,11 @@ function MakeToolbars(toolbox, data, callback) // pass false as callback to supp
 			{	name: "Erase",	image: "image/delete.png",	tool: Erase,	},
 		],
 		[
-			{	name: "North",	image: "image/crocU.png",	tool: MakeCroc,	params: [0],	},
-			{	name: "East",	image: "image/crocR.png",	tool: MakeCroc,	params: [1],	},
-			{	name: "South",	image: "image/crocD.png",	tool: MakeCroc,	params: [2],	},
-			{	name: "West",	image: "image/crocL.png",	tool: MakeCroc,	params: [3],	},
-			{	name: "Auto",	image: "image/crocO.png",	tool: MakeCroc,	params: [4],	},
+			{	name: "North",	image: "image/crocU.png",	tool: MakeCroc,	params: [dirNorth],	},
+			{	name: "East",	image: "image/crocR.png",	tool: MakeCroc,	params: [dirEast],	},
+			{	name: "South",	image: "image/crocD.png",	tool: MakeCroc,	params: [dirSouth],	},
+			{	name: "West",	image: "image/crocL.png",	tool: MakeCroc,	params: [dirWest],	},
+			{	name: "Auto",	image: "image/crocO.png",	tool: MakeCroc,	params: [dirAuto],	},
 			{	name: "Meat",	image: "image/meat.png",	tool: MakeMeat,	},
 		]
 	];
@@ -216,6 +216,7 @@ function MakeToolbars(toolbox, data, callback) // pass false as callback to supp
 	
 	function Reset()
 	{
+		Pause();
 		if(!confirm("Clear whole field?"))
 			return;
 		var k = prompt("Enter new map size (one or two numbers, separated by anything), or leave the filed blank to keep current map size");
@@ -230,18 +231,19 @@ function MakeToolbars(toolbox, data, callback) // pass false as callback to supp
 	
 	function Load()
 	{
-		var data = prompt("Enter saved data, or nothing to cancel");
+		Pause();
+		var data = prompt("Enter saved data");
 		if(!data)
 			return; // silently
 		data = JSON.parse(data);
 		if(!data)
 			return void(alert("Invalid JSON"));
-		Pause();
 		restore(data);
 	}
 	
 	function Save()
 	{
+		Pause();
 		alert(JSON.stringify(serialize()));
 	}
 	
