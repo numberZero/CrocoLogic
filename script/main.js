@@ -35,6 +35,7 @@ var saved;
 		this.y = y;
 		this.cell = td;
 		this.content = null;
+		this.targetedBy = null;
 //		td.textContent = " ";
 		td.field = this;
 		td.fieldX = x;
@@ -47,6 +48,7 @@ var saved;
 		resetTargeted: function()
 		{
 			this.targeted = [null, null, null, null];
+			this.targetedBy = null;
 		},
 	}
 	
@@ -85,6 +87,8 @@ var saved;
 	{
 		if(field.content)
 			throw "Field occupied";
+		if(field.targetedBy)
+			throw "Field is targeted by another Crocodile";
 		this.id = crocCount++;
 		this.field = {};
 		this.target = field;
@@ -231,6 +235,7 @@ var saved;
 					this.target = this.field;
 				else
 					this.goTo(this.target.x, this.target.y);
+				this.target.targetedBy = this;
 			},
  
 		goTo: function(x, y)
