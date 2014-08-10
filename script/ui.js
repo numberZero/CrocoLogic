@@ -244,7 +244,7 @@ function MakeToolbars(toolbox, data, callback) // pass false as callback to supp
 	function Save()
 	{
 		Pause();
-		alert(JSON.stringify(serialize()));
+		prompt("Your saved data: ", JSON.stringify(serialize()));
 	}
 	
 	Pause();
