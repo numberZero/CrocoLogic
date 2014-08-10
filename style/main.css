@@ -1,0 +1,30 @@
+﻿@charset "utf-8";
+@import "battlefield.css";
+@import "panel.css";
+
+*
+{
+	margin: 0;
+	padding: 0;
+}
+
+body
+{
+	font-family: sans-serif;
+	padding: 0.0pt 24.0pt;
+}
+
+h1
+{
+	margin: 8.0pt 0.0pt;
+}
+
+h3
+{
+	margin: 12.0pt 0.0pt 4.0pt;
+}
+
+h2
+{
+	margin: 0;
+}

@@ -1,7 +1,5 @@
-﻿const fieldWidth = 36;
-const fieldHeight = 36;
-const mapWidth = 12;
-const mapHeight = 12;
+﻿var mapWidth = 12;
+var mapHeight = 12;
 const walkTime = 0.4;
 const stepLen = 0.02;
 const stepCount = Math.floor(walkTime / stepLen);
@@ -11,31 +9,29 @@ const dirNorth = 0;
 const dirEast = 1;
 const dirSouth = 2;
 const dirWest = 3;
-const dirAuto = 4;
+const dirCount = 4;
 
-var bf = document.getElementById("Battlefield");
-var bkg = document.createElement("table");
-var doUpdating = false;
-var saved;
+const dirAuto = -1; // anything except of [0; dirCount)
+const dirNone = -1; // anything except of [0; dirCount)
 
 (function()
 {
 	const _Directions = [
-		{"x":  0, "y": -1},
-		{"x": +1, "y":  0},
-		{"x":  0, "y": +1},
-		{"x": -1, "y":  0},
-		{"x":  0, "y":  0},
+		{x:  0, y: -1},
+		{x: +1, y:  0},
+		{x:  0, y: +1},
+		{x: -1, y:  0},
 		];
-	const _Images = ["crocU.png", "crocR.png", "crocD.png", "crocL.png"];
-	const _OmniImages = ["crocOU.png", "crocOR.png", "crocOD.png", "crocOL.png"];
-		
+	const _Images = ["image/crocU.png", "image/crocR.png", "image/crocD.png", "image/crocL.png"];
+	const _OmniImages = ["image/crocOU.png", "image/crocOR.png", "image/crocOD.png", "image/crocOL.png"];
+
 	var Cell = function(x, y, td)
 	{
 		this.x = x;
 		this.y = y;
 		this.cell = td;
 		this.content = null;
+		this.targetedBy = null;
 		td.field = this;
 		td.fieldX = x;
 		td.fieldY = y;
@@ -47,6 +43,7 @@ var saved;
 		resetTargeted: function()
 		{
 			this.targeted = [null, null, null, null];
+			this.targetedBy = null;
 		},
 	}
 	
@@ -83,6 +80,9 @@ var saved;
 	{
 		if(field.content)
 			throw "Field occupied";
+		if(field.targetedBy)
+			throw "Field is targeted by another Crocodile";
+		this.id = crocCount++;
 		this.field = {};
 		this.target = field;
 		this.sleep = 0;
@@ -101,9 +101,9 @@ var saved;
 			this.omnicroc = false;
 			this.images = _Images;
 		}
-		this.img.src = this.images[this.dir];
 		this.img.object = this;
 		this.update();
+		this.updateImageParams();
 		bf.appendChild(this.img);
 	}
 
@@ -111,11 +111,17 @@ var saved;
 		constructor: this.Crocodile,
 		die: _Die,
 
+		updateImageParams: function()
+			{
+				this.img.style.left = this.x + "em";
+				this.img.style.top = this.y + "em";
+				this.img.style.opacity = 1 / (this.sleepiness + 1);
+			},
+
 		updateImage: function()
 			{
-				this.img.style.left = this.x * fieldWidth + "pt";
-				this.img.style.top = this.y * fieldHeight + "pt";
-				this.img.style.opacity = 1 / (this.sleepiness + 1);
+				this.img.src = this.images[this.dir];
+				this.updateImageParams();
 			},
 
 		step: function()
@@ -124,28 +130,32 @@ var saved;
 				this.y += this.vy;
 				if(this.sleepiness)
 					this.sleepiness -= normVel;//1 / stepCount;
-				this.updateImage();
+				this.updateImageParams();
 			},
  
 		update: function()
-			{	
-				if (this.sleep)
-					return;
-				this.field.content = null;
-				this.field = this.target;
+			{
+				if(!this.sleep)
+				{
+					this.field.content = null;
+					this.field = this.target;
+				}
 				this.x = this.field.x;
 				this.y = this.field.y;
 				this.vx = 0;
 				this.vy = 0;
-				if(this.field.content)
+				if(!this.sleep)
 				{
-					if(!(this.field.content instanceof Meat))
-						throw "Can't eat anything except of Meat";
-					this.field.content.die();
-					this.sleep = 3;
-					++this.ate;
+					if(this.field.content)
+					{
+						if(!(this.field.content instanceof Meat))
+							throw "Can't eat anything except of Meat";
+						this.field.content.die();
+						this.sleep = 3;
+						++this.ate;
+					}
+					this.field.content = this;
 				}
-				this.field.content = this;
 				this.sleepiness = this.sleep;
 				this.updateImage();
 			},
@@ -154,7 +164,7 @@ var saved;
 			{
 				if (this.sleep)
 					return;
-				var dir = 4;
+				var dir = dirNone;
 				var minLen = Number.POSITIVE_INFINITY;
 				
 				var tdir = this.dir;
@@ -167,7 +177,7 @@ var saved;
 				
 				if (this.omnicroc)
 				{
-					tdir = (this.dir + 1) % 4;
+					tdir = (this.dir + 1) % dirCount;
 					len = this.checkForMeat(tdir);
 					if(len < minLen)
 					{
@@ -175,7 +185,7 @@ var saved;
 						dir = tdir;
 					}
 					
-					tdir = (this.dir + 3) % 4;
+					tdir = (this.dir + 3) % dirCount;
 					len = this.checkForMeat(tdir);
 					if(len < minLen)
 					{
@@ -183,7 +193,7 @@ var saved;
 						dir = tdir;
 					}
 					
-					tdir = (this.dir + 2) % 4;
+					tdir = (this.dir + 2) % dirCount;
 					len = this.checkForMeat(tdir);
 					if(len < minLen)
 					{
@@ -192,14 +202,14 @@ var saved;
 					}
 				}
 				
-				if(dir != 4)
+				if(dir != dirNone)
 				{
 					this.dir = dir;
-					this.img.src = this.images[this.dir];
 					dir = _Directions[this.dir];
 					this.target = _Crocodiles[this.y + dir.y][this.x + dir.x];
 					this.target.targeted[this.dir] = this;
 				}
+				this.updateImage();
 			},
  
 		go: function()
@@ -209,31 +219,26 @@ var saved;
 					--this.sleep;
 					return;
 				}
-				var front = this.target.targeted[(this.dir + 2) % 4]; // targeted from front
-				var left = this.target.targeted[(this.dir + 1) % 4]; // targeted from left
-				var right = this.target.targeted[(this.dir + 3) % 4]; // targeted from right
+				if(this.target == this.field)
+					return;
+				var front = this.target.targeted[(this.dir + 2) % dirCount]; // targeted from front
+				var left = this.target.targeted[(this.dir + 1) % dirCount]; // targeted from left
+				var right = this.target.targeted[(this.dir + 3) % dirCount]; // targeted from right
 				if(front && left && right)
-					this.dir = (this.dir + 2) % 4;
+					this.dir = (this.dir + 2) % dirCount;
 				if(front || ((left == null) != (right == null)))
 					this.target = this.field;
 				else
-					this.goTo(this.target.x, this.target.y);
+					this.walk();
 			},
  
-		goTo: function(x, y)
+		walk: function()
 			{
-				if((x != this.x) && (y != this.y))
-					throw "Diagonal movements are not allowed";
-				if((x == this.x) && (y == this.y))
-					return;
-				if(x == this.x)
-					this.vy = (y > this.y) ? 1 : -1;
-				else
-					this.vx = (x > this.x) ? 1 : -1;
-				this.vx *= normVel;
-				this.vy *= normVel;
+				this.vx = _Directions[this.dir].x * normVel;
+				this.vy = _Directions[this.dir].y * normVel;
+				this.target.targetedBy = this;
 			},
-		
+	
 		checkForMeat: function(dir)
 			{
 				if(!dir.hasOwnProperty("x"))
@@ -269,10 +274,10 @@ var saved;
 		this.target = field;
 		this.img = document.createElement("img");
 		this.img.className = "Meat";
-		this.img.src = "meat.png";
+		this.img.src = "image/meat.png";
 		this.img.object = this;
-		this.img.style.left = this.x * fieldWidth + "pt";
-		this.img.style.top = this.y * fieldHeight + "pt";
+		this.img.style.left = this.x + "em";
+		this.img.style.top = this.y + "em";
 		bf.appendChild(this.img);
 	}
 	
@@ -303,40 +308,100 @@ var saved;
 			_AnimSteps = stepCount;
 		}
 	}
-
-	var _Crocodiles = [];
-	for(var j = 0; j < mapHeight; ++j)
-	{
-		var row = [];
-		var trow = bkg.insertRow(-1);
-		for(var i = 0; i < mapWidth; ++i)
-			row.push(new Cell(i, j, trow.insertCell(-1)));
-		_Crocodiles.push(row);
-	}
-	bf.appendChild(bkg);
 	
-	this.onupdate = [];
+	this.play = function()
+	{
+		doUpdating = true;
+	}
+	
+	this.pause = function()
+	{
+		doUpdating = false;
+	}
+	
+	this.initialize = function(width, height)
+	{
+		var c = document.getElementById("BattlefieldContainer");
+		if(_Crocodiles)
+		{
+			c.removeChild(bf);
+			c.removeChild(bkg);
+			forEachCell(function()
+				{
+					if(this.content)
+						this.content.die();
+				});
+		}
+		if(width || height)
+		{
+			mapWidth = width;
+			mapHeight = height || width;
+			_Crocodiles = [];
+			while(bkg.rows.length)
+				bkg.deleteRow(0);
+			for(var j = 0; j < mapHeight; ++j)
+			{
+				var row = [];
+				var trow = bkg.insertRow(-1);
+				for(var i = 0; i < mapWidth; ++i)
+					row.push(new Cell(i, j, trow.insertCell(-1)));
+				_Crocodiles.push(row);
+			}
+		}
+		c.appendChild(bf);
+		c.appendChild(bkg);
+	}
 
+	this.serialize = function()
+	{
+		var data = {width: mapWidth, height: mapHeight, meat: [], crocodiles: []};
+		forEachCell(function()
+			{
+				if(this.content instanceof Meat)
+					data.meat.push({
+						x: this.x,
+						y: this.y,
+					});
+				if(this.content instanceof Crocodile)
+					data.crocodiles.push({
+						x: this.x,
+						y: this.y,
+						dir: this.content.dir,
+						omnicroc: this.content.omnicroc,
+						sleep: this.content.sleep,
+					});
+			});
+		return data;
+	}
+
+	this.restore = function(data)
+	{
+		if(!data || !data.width || !data.height || !(data.meat instanceof Array)|| !(data.crocodiles instanceof Array))
+			throw "Invalid data";
+		this.initialize(data.width, data.height);
+		for(var i = 0; i < data.meat.length; ++i)
+		{
+			var desc = data.meat[i];
+			var meat = new Meat(_Crocodiles[desc.y][desc.x]);
+		}
+		for(var i = 0; i < data.crocodiles.length; ++i)
+		{
+			var desc = data.crocodiles[i];
+			var croc = new Crocodile(_Crocodiles[desc.y][desc.x], desc.omnicroc ? dirAuto : desc.dir);
+			croc.dir = desc.dir;
+			croc.sleep = desc.sleep;
+			croc.update();
+		}
+	}
+
+	var _Crocodiles;
+	var crocCount = 0;
+	var doUpdating;
+	var bf = document.getElementById("Battlefield");
+	var bkg = document.createElement("table");
+	bkg.id = "BattlefieldGrid";
+	this.onupdate = [];
+	this.pause();
+	this.initialize(mapWidth, mapHeight);
 	setInterval(_GlobalStep, stepLen * 1000);
 })();
-
-function playPause()
-{
-	doUpdating = !doUpdating;
-	document.getElementById("PlayButton").src = doUpdating ? "pause.png" : "play.png"
-}
-
-function save()
-{
-	alert("Saved!");
-}
-
-function load()
-{
-	alert("Loaded!");
-}
-
-function reset()
-{
-	alert("Cleaned!");
-}
