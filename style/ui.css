@@ -1,0 +1,27 @@
+@charset "utf-8";
+@import "panel.css";
+
+.ObjectSelected
+{
+	background: #CCF;
+}
+
+.UsingTool_MakeCroc #BattlefieldGrid td:hover
+{
+	background: #9F0;
+}
+
+.UsingTool_MakeObject #BattlefieldGrid td:hover
+{
+	background: #C6F;
+}
+
+.UsingTool_Select #BattlefieldGrid td:hover
+{
+	background: #66F;
+}
+
+.UsingTool_Erase #BattlefieldGrid td:hover
+{
+	background: #F00;
+}

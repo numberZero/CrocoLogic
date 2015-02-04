@@ -57,28 +57,3 @@
 {
 	z-index: -2;
 }
-
-.ObjectSelected
-{
-	background: #CCF;
-}
-
-.UsingTool_MakeCroc #BattlefieldGrid td:hover
-{
-	background: #9F0;
-}
-
-.UsingTool_MakeMeat #BattlefieldGrid td:hover
-{
-	background: #F90;
-}
-
-.UsingTool_Select #BattlefieldGrid td:hover
-{
-	background: #66F;
-}
-
-.UsingTool_Erase #BattlefieldGrid td:hover
-{
-	background: #F00;
-}

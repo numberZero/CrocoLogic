@@ -130,11 +130,24 @@ function MakeToolbars(toolbox, data, callback) // pass false as callback to supp
 		new Crocodile(this.field, dir);
 	}
 	
-	function MakeMeat()
+	function MakeObject(type)
 	{
 		if(this.field.content)
 			return;
-		new Meat(this.field);
+		switch(type)
+		{
+			case objMeat:
+				new Meat(this.field);
+				break;
+				
+			case objBlock:
+				new Block(this.field);
+				break;
+				
+			case objGlass:
+				new Block(this.field, true);
+				break;
+		}
 	}
 	
 	function SelectTool()
@@ -165,7 +178,11 @@ function MakeToolbars(toolbox, data, callback) // pass false as callback to supp
 			{	name: "South",	image: "image/crocD.png",	tool: MakeCroc,	params: [dirSouth],	},
 			{	name: "West",	image: "image/crocL.png",	tool: MakeCroc,	params: [dirWest],	},
 			{	name: "Auto",	image: "image/crocO.png",	tool: MakeCroc,	params: [dirAuto],	},
-			{	name: "Meat",	image: "image/meat.png",	tool: MakeMeat,	},
+		],
+		[
+			{	name: "Meat",	image: "image/meat.png",	tool: MakeObject, params: [objMeat],	},
+			{	name: "Block",	image: "image/block.png",	tool: MakeObject, params: [objBlock],	},
+			{	name: "Glass",	image: "image/glass.png",	tool: MakeObject, params: [objGlass],	},
 		]
 	];
 

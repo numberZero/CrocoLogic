@@ -5,6 +5,10 @@ const stepLen = 0.02;
 const stepCount = Math.floor(walkTime / stepLen);
 const normVel = 1 / stepCount;
 
+const objMeat = 1;
+const objBlock = 2;
+const objGlass = 3;
+
 const dirNorth = 0;
 const dirEast = 1;
 const dirSouth = 2;
@@ -52,7 +56,7 @@ const dirNone = -1; // anything except of [0; dirCount)
 		var args = Array.prototype.slice.call(arguments, 1);
 		for(var j = 0; j < mapHeight; ++j)
 		{
-			var row = _Crocodiles[j];
+			var row = _Map[j];
 			for(var i = 0; i < mapWidth; ++i)
 				callback.apply(row[i], args);
 		}
@@ -206,7 +210,7 @@ const dirNone = -1; // anything except of [0; dirCount)
 				{
 					this.dir = dir;
 					dir = _Directions[this.dir];
-					this.target = _Crocodiles[this.y + dir.y][this.x + dir.x];
+					this.target = _Map[this.y + dir.y][this.x + dir.x];
 					this.target.targeted[this.dir] = this;
 				}
 				this.updateImage();
@@ -221,6 +225,12 @@ const dirNone = -1; // anything except of [0; dirCount)
 				}
 				if(this.target == this.field)
 					return;
+				if(this.target.content && !this.target.content.isMeat)
+				{
+					this.target.targeted[this.dir] = null;
+					this.target = this.field;
+					return;
+				}
 				var front = this.target.targeted[(this.dir + 2) % dirCount]; // targeted from front
 				var left = this.target.targeted[(this.dir + 1) % dirCount]; // targeted from left
 				var right = this.target.targeted[(this.dir + 3) % dirCount]; // targeted from right
@@ -253,16 +263,16 @@ const dirNone = -1; // anything except of [0; dirCount)
 						break;
 					if((x >= mapWidth) || (y >= mapHeight))
 						break;
-					var obj = _Crocodiles[y][x].content;
+					var obj = _Map[y][x].content;
 					if(obj instanceof Meat)
 						return Math.abs(x - this.field.x + y - this.field.y);
-					if(obj)
+					if(obj && !obj.isTransparent)
 						break;
 				}
 				return Number.POSITIVE_INFINITY;
 			},
 	}
-		
+	
 	this.Meat = function(field)
 	{
 		if(field.content)
@@ -284,8 +294,41 @@ const dirNone = -1; // anything except of [0; dirCount)
 	this.Meat.prototype = {
 		constructor: this.Meat,
 		die: _Die,
+		isMeat: true,
 	}
-
+	
+	this.Block = function(field, transparent)
+	{
+		if(field.content)
+			throw "Field occupied";
+		field.content = this;
+		this.field = field;
+		this.x = field.x;
+		this.y = field.y;
+		this.target = field;
+		this.img = document.createElement("img");
+		if(transparent)
+		{
+			this.img.className = "Glass";
+			this.img.src = "image/glass.png";
+		}
+		else
+		{
+			this.img.className = "Block";
+			this.img.src = "image/block.png";
+		}
+		this.isTransparent = !!transparent;
+		this.img.object = this;
+		this.img.style.left = this.x + "em";
+		this.img.style.top = this.y + "em";
+		bf.appendChild(this.img);
+	}
+	
+	this.Block.prototype = {
+		constructor: this.Block,
+		die: _Die,
+	}
+	
 	var _AnimSteps = stepCount;
 	var _GlobalUpdate = function()
 	{
@@ -322,7 +365,7 @@ const dirNone = -1; // anything except of [0; dirCount)
 	this.initialize = function(width, height)
 	{
 		var c = document.getElementById("BattlefieldContainer");
-		if(_Crocodiles)
+		if(_Map)
 		{
 			c.removeChild(bf);
 			c.removeChild(bkg);
@@ -336,7 +379,7 @@ const dirNone = -1; // anything except of [0; dirCount)
 		{
 			mapWidth = width;
 			mapHeight = height || width;
-			_Crocodiles = [];
+			_Map = [];
 			while(bkg.rows.length)
 				bkg.deleteRow(0);
 			for(var j = 0; j < mapHeight; ++j)
@@ -345,7 +388,7 @@ const dirNone = -1; // anything except of [0; dirCount)
 				var trow = bkg.insertRow(-1);
 				for(var i = 0; i < mapWidth; ++i)
 					row.push(new Cell(i, j, trow.insertCell(-1)));
-				_Crocodiles.push(row);
+				_Map.push(row);
 			}
 		}
 		c.appendChild(bf);
@@ -382,19 +425,19 @@ const dirNone = -1; // anything except of [0; dirCount)
 		for(var i = 0; i < data.meat.length; ++i)
 		{
 			var desc = data.meat[i];
-			var meat = new Meat(_Crocodiles[desc.y][desc.x]);
+			var meat = new Meat(_Map[desc.y][desc.x]);
 		}
 		for(var i = 0; i < data.crocodiles.length; ++i)
 		{
 			var desc = data.crocodiles[i];
-			var croc = new Crocodile(_Crocodiles[desc.y][desc.x], desc.omnicroc ? dirAuto : desc.dir);
+			var croc = new Crocodile(_Map[desc.y][desc.x], desc.omnicroc ? dirAuto : desc.dir);
 			croc.dir = desc.dir;
 			croc.sleep = desc.sleep;
 			croc.update();
 		}
 	}
 
-	var _Crocodiles;
+	var _Map;
 	var crocCount = 0;
 	var doUpdating;
 	var bf = document.getElementById("Battlefield");
