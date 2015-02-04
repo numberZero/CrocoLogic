@@ -246,22 +246,55 @@ function MakeToolbars(toolbox, data, callback) // pass false as callback to supp
 		initialize(w, h);
 	}
 	
+	var modalLoad = document.getElementById("ModalLoad");
+	var modalSave = document.getElementById("ModalSave");
+	modalLoad.content = document.getElementById("ModalLoadJSON");
+	modalSave.content = document.getElementById("ModalSaveJSON");
+	
+	document.getElementById("ModalLoadCancel").addEventListener("click", function()
+	{
+		modalLoad.classList.remove("ModalActive");
+	});
+	
+	document.getElementById("ModalLoadLoad").addEventListener("click", function()
+	{
+		var data = modalLoad.content.value;
+		if(data)
+		{
+			data = JSON.parse(data);
+			if(!data)
+				return void(alert("Invalid JSON"));
+			restore(data);
+		}
+		modalLoad.classList.remove("ModalActive");
+	});
+	
+	document.getElementById("ModalSaveOk").addEventListener("click", function()
+	{
+		modalSave.classList.remove("ModalActive");
+	});
+	
+	addEventListener("keypress", function(e)
+	{
+		if(e.keyCode != 27) // <Esc>
+			return;
+		var modal = document.getElementsByClassName("ModalActive");
+		while(modal.length)
+			modal[0].classList.remove("ModalActive");
+	});
+	
 	function Load()
 	{
 		Pause();
-		var data = prompt("Enter saved data");
-		if(!data)
-			return; // silently
-		data = JSON.parse(data);
-		if(!data)
-			return void(alert("Invalid JSON"));
-		restore(data);
+		modalLoad.content.value = "";
+		modalLoad.classList.add("ModalActive");
 	}
 	
 	function Save()
 	{
 		Pause();
-		prompt("Your saved data: ", JSON.stringify(serialize()));
+		modalSave.content.value = JSON.stringify(serialize());
+		modalSave.classList.add("ModalActive");
 	}
 	
 	Pause();
