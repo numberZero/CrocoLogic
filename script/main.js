@@ -397,13 +397,19 @@ const dirNone = -1; // anything except of [0; dirCount)
 
 	this.serialize = function()
 	{
-		var data = {width: mapWidth, height: mapHeight, meat: [], crocodiles: []};
+		var data = {width: mapWidth, height: mapHeight, meat: [], block: [], crocodiles: []};
 		forEachCell(function()
 			{
 				if(this.content instanceof Meat)
 					data.meat.push({
 						x: this.x,
 						y: this.y,
+					});
+				if(this.content instanceof Block)
+					data.block.push({
+						x: this.x,
+						y: this.y,
+						glass: this.content.isTransparent,
 					});
 				if(this.content instanceof Crocodile)
 					data.crocodiles.push({
@@ -422,6 +428,11 @@ const dirNone = -1; // anything except of [0; dirCount)
 		if(!data || !data.width || !data.height || !(data.meat instanceof Array)|| !(data.crocodiles instanceof Array))
 			throw "Invalid data";
 		this.initialize(data.width, data.height);
+		for(var i = 0; i < data.block.length; ++i)
+		{
+			var desc = data.block[i];
+			var meat = new Block(_Map[desc.y][desc.x], desc.glass);
+		}
 		for(var i = 0; i < data.meat.length; ++i)
 		{
 			var desc = data.meat[i];
